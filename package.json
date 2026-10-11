@@ -1,0 +1,21 @@
+{
+  "name": "jsforge",
+  "version": "1.0.0",
+  "description": "纯 JS 单文件世界级 ML/数值算法库 · 零依赖零构建 · 浏览器一键自检 + 无头 Node 8/8 全绿 · 零重写集大成 · 作者 晨星",
+  "main": "run-node.js",
+  "scripts": {
+    "test": "node run-node.js",
+    "serve": "node serve.js"
+  },
+  "license": "MIT",
+  "author": "晨星",
+  "keywords": [
+    "machine-learning",
+    "numerical",
+    "pca",
+    "gmm",
+    "neural-network",
+    "attention",
+    "zero-dependency"
+  ]
+}

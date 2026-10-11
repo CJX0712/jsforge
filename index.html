@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>jsforge · 自检面板 · 晨星</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --ink: #1f2933;
+    --muted: #6b7785;
+    --line: #e4e9f0;
+    --ok: #1f9d55;
+    --okbg: #e9f8ef;
+    --bad: #d64545;
+    --badbg: #fdecec;
+    --accent: #2b6cb0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 28px 18px 60px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 22px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: .5px; }
+  .sub { color: var(--muted); font-size: 14px; }
+  .bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 18px; margin: 18px 0;
+  }
+  .total { font-size: 20px; font-weight: 700; }
+  .total small { font-size: 13px; color: var(--muted); font-weight: 400; }
+  button {
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: 9px 18px; border-radius: 9px; font-size: 14px; cursor: pointer;
+  }
+  button:active { transform: translateY(1px); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  .card h2 { font-size: 16px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+  .card .cnt { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .pill { font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+  .pill.ok { background: var(--okbg); color: var(--ok); }
+  .pill.bad { background: var(--badbg); color: var(--bad); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; border-top: 1px dashed var(--line); font-size: 13px; }
+  li:first-child { border-top: none; }
+  .ic { flex: 0 0 auto; font-weight: 700; }
+  .ic.ok { color: var(--ok); } .ic.bad { color: var(--bad); }
+  .nm { flex: 1 1 auto; }
+  .info { flex: 0 0 auto; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+  code { background: #eef2f7; padding: 1px 6px; border-radius: 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>jsforge 自检面板</h1>
+    <div class="sub">纯 JS 单文件 · 零依赖 · 零构建 · 世界级算法库 · 作者 晨星</div>
+  </header>
+
+  <div class="bar">
+    <div class="total" id="total">运行自检…</div>
+    <button id="runBtn" onclick="runAll()">重新运行自检</button>
+  </div>
+
+  <div class="grid" id="cards"></div>
+
+  <footer>
+    运行方式：<code>node run-node.js</code>（无头 8/8 全绿）· 或浏览器打开本页一键自检 ·
+    <code>npm run serve</code> 本地预览
+  </footer>
+</div>
+
+<!-- 依次加载四个 forge 模块（经典脚本，file:// 可直接打开） -->
+<script src="pca-forge.js"></script>
+<script src="gmm-forge.js"></script>
+<script src="nn-forge.js"></script>
+<script src="attn-forge.js"></script>
+<script>
+  const MODULES = [
+    { key: 'PCAForge',  label: 'pca-forge'  },
+    { key: 'GMMForge',  label: 'gmm-forge'  },
+    { key: 'NNForge',   label: 'nn-forge'   },
+    { key: 'ATTNForge', label: 'attn-forge' },
+  ];
+
+  function runAll() {
+    const cardsEl = document.getElementById('cards');
+    const totalEl = document.getElementById('total');
+    cardsEl.innerHTML = '';
+    totalEl.textContent = '自检中…';
+    let totalPass = 0, totalAll = 0;
+
+    MODULES.forEach(({ key, label }) => {
+      const api = window[key];
+      let res = { name: label, pass: 0, total: 0, checks: [] };
+      try {
+        if (api && typeof api.selftest === 'function') res = api.selftest();
+        else throw new Error('模块未加载');
+      } catch (e) {
+        res.checks.push({ name: '加载失败: ' + e.message, pass: false, info: '' });
+      }
+
+      const ok = res.pass === res.total && res.total > 0;
+      totalPass += res.pass; totalAll += res.total;
+
+      const li = (c) => `<li>
+        <span class="ic ${c.pass ? 'ok' : 'bad'}">${c.pass ? '✅' : '❌'}</span>
+        <span class="nm">${c.name}</span>
+        <span class="info">${c.info || ''}</span>
+      </li>`;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h2>${label} <span class="pill ${ok ? 'ok' : 'bad'}">${ok ? 'PASS' : 'FAIL'}</span></h2>
+        <div class="cnt">${res.pass}/${res.total} 全绿</div>
+        <ul>${res.checks.map(li).join('')}</ul>`;
+      cardsEl.appendChild(card);
+    });
+
+    const allGreen = totalPass === totalAll && totalAll > 0;
+    totalEl.innerHTML = `总计 <span style="color:${allGreen ? 'var(--ok)' : 'var(--bad)'}">${totalPass}/${totalAll}</span> <small>${allGreen ? '✅ 全部通过' : '❌ 存在失败'}</small>`;
+  }
+
+  // 页面加载后自动运行
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runAll);
+  } else {
+    runAll();
+  }
+</script>
+</body>
+</html>

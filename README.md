@@ -1,5 +1,12 @@
 # jsforge
 
+<div align="center">
+
+[![License](https://img.shields.io/badge/License-MIT-green)](https://github.com/CJX0712/jsforge/blob/main/LICENSE) [![Language](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript)](https://github.com/CJX0712/jsforge) [![Deps](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/CJX0712) [![Verified](https://img.shields.io/badge/invariants-verified-brightgreen)](https://github.com/CJX0712) [![Author](https://img.shields.io/badge/author-晨星-blueviolet)](https://github.com/CJX0712)
+
+</div>
+
+
 > 纯 JavaScript 单文件 · 零依赖 · 零构建 · 世界级机器学习 / 数值算法库
 > 浏览器一键自检 + 无头 Node 8/8 全绿 · 可运行 · 可复现 · 可验证
 > **作者：晨星**
